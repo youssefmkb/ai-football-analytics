@@ -1,0 +1,27 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node
+node_modules/
+.next/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+
+# Match footage and model weights never go in the repository
+*.mp4
+*.mov
+*.pt
+*.onnx
