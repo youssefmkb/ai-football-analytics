@@ -22,6 +22,8 @@ type AuthContextValue = {
   register: (fullName: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   createClub: (name: string) => Promise<void>;
+  /** Fetch the user and their club again, after joining or leaving one. */
+  reloadMe: () => Promise<void>;
   /** Authenticated API call, relative to /api/v1. */
   api: <T>(
     path: string,
@@ -115,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await loadMe();
       },
       api: authed,
+      reloadMe: loadMe,
     }),
     [status, me, loadMe, authed],
   );

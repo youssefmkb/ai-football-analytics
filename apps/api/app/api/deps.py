@@ -64,3 +64,10 @@ def require_staff(membership: Membership = Depends(get_current_membership)) -> M
     if membership.role not in (Role.CLUB_ADMIN, Role.COACH):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Staff only")
     return membership
+
+
+def require_admin(membership: Membership = Depends(get_current_membership)) -> Membership:
+    """Only club admins manage members and invitations."""
+    if membership.role != Role.CLUB_ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Club admin only")
+    return membership
