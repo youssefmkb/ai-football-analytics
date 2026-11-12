@@ -41,9 +41,16 @@ python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 
-pytest                           # tests, no database needed
+pytest                           # fast run on in-memory SQLite, no service needed
 ruff check . && ruff format --check .
 uvicorn app.main:app --reload    # needs PostgreSQL, see DATABASE_URL in app/core/config.py
+```
+
+The row-level security tests need PostgreSQL and are skipped on SQLite. To run everything, as the CI does, point the tests to an empty database. With the Docker stack running:
+
+```bash
+docker compose exec db createdb -U afa afa_test
+TEST_DATABASE_URL=postgresql+psycopg://afa:afa@localhost:5432/afa_test pytest
 ```
 
 Database migrations:
@@ -69,6 +76,15 @@ Checks run by the CI: `npm run lint`, `npx tsc --noEmit`, `npm run build`.
 - The refresh token is an `HttpOnly` cookie, stored hashed in the database, rotated on every use and revoked on logout. Replaying an old refresh token ends all sessions of that user.
 - The club of a request is always resolved from the token, never from a parameter sent by the client.
 - Outside development, the API refuses to start without `SECRET_KEY` and `COOKIE_SECURE=true`.
+
+## Club isolation
+
+Every club-scoped table carries an `organization_id`. Two layers keep clubs apart:
+
+1. Endpoints filter by the caller's club, resolved from the token.
+2. PostgreSQL row-level security: club-scoped requests run as the restricted `afa_app` role with `app.current_organization_id` set, so a query that forgets its filter returns nothing from other clubs.
+
+See `apps/api/app/db/tenant.py`. New club-scoped tables must be added to a migration that enables the policy, and endpoints must use the `get_tenant_db` dependency.
 
 ## Workflow
 

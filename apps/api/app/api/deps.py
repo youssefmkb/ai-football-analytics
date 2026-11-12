@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.security import decode_access_token
 from app.db.session import get_db
-from app.models import Membership, User
+from app.db.tenant import bind_tenant
+from app.models import Membership, Role, User
 
 _bearer = HTTPBearer(auto_error=False)
 
@@ -47,4 +48,19 @@ def get_current_membership(
     """Every club-scoped endpoint depends on this: the club comes from the token only."""
     if membership is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No club yet")
+    return membership
+
+
+def get_tenant_db(
+    membership: Membership = Depends(get_current_membership), db: Session = Depends(get_db)
+) -> Session:
+    """Session scoped to the caller's club. Use it for every club-scoped query."""
+    bind_tenant(db, membership.organization_id)
+    return db
+
+
+def require_staff(membership: Membership = Depends(get_current_membership)) -> Membership:
+    """Only club admins and coaches may change club data."""
+    if membership.role not in (Role.CLUB_ADMIN, Role.COACH):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Staff only")
     return membership

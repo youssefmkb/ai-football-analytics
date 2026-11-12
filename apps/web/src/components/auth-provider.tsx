@@ -22,6 +22,11 @@ type AuthContextValue = {
   register: (fullName: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   createClub: (name: string) => Promise<void>;
+  /** Authenticated API call, relative to /api/v1. */
+  api: <T>(
+    path: string,
+    options?: { method?: string; body?: unknown },
+  ) => Promise<T>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -109,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await authed("/organizations", { method: "POST", body: { name } });
         await loadMe();
       },
+      api: authed,
     }),
     [status, me, loadMe, authed],
   );

@@ -11,6 +11,27 @@ export type Me = {
   } | null;
 };
 
+export type Position = "goalkeeper" | "defender" | "midfielder" | "forward";
+
+export type Team = {
+  id: string;
+  name: string;
+  default_format: number;
+  player_count: number;
+};
+
+export type SquadPlayer = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  shirt_number: number | null;
+  position: Position | null;
+};
+
+export function isStaff(role: Role | undefined): boolean {
+  return role === "club_admin" || role === "coach";
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
