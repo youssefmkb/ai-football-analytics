@@ -28,6 +28,30 @@ export type SquadPlayer = {
   position: Position | null;
 };
 
+export type Match = {
+  id: string;
+  team_id: string;
+  team_name: string;
+  opponent_name: string;
+  kickoff_at: string;
+  format: number;
+  location: string | null;
+  competition: string | null;
+  score_team: number | null;
+  score_opponent: number | null;
+  status: "draft" | "in_review" | "published";
+};
+
+export type LineupEntry = {
+  player_id: string;
+  first_name: string;
+  last_name: string;
+  shirt_number: number | null;
+  is_starter: boolean;
+};
+
+export type MatchDetail = Match & { lineup: LineupEntry[] };
+
 export function isStaff(role: Role | undefined): boolean {
   return role === "club_admin" || role === "coach";
 }

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { useAuth } from "@/components/auth-provider";
 import { Field, FormError, Select, SubmitButton } from "@/components/form";
+import { MatchesSection } from "@/components/matches-section";
 import {
   ApiError,
   isStaff,
@@ -104,7 +105,12 @@ export function TeamView() {
       await api(`/teams/${id}/players/${player.id}`, { method: "DELETE" });
       setSquad(await fetchSquad());
     } catch (failure) {
-      setError(errorMessage(failure, WRITE_ERRORS));
+      setError(
+        errorMessage(failure, {
+          ...WRITE_ERRORS,
+          409: `${player.first_name} ${player.last_name} figure dans la composition d'un match et ne peut pas être retiré.`,
+        }),
+      );
     }
   }
 
@@ -139,6 +145,8 @@ export function TeamView() {
           Football à {team.default_format}
         </p>
       </header>
+
+      <MatchesSection teamId={team.id} />
 
       <section className="flex flex-col gap-4">
         <h2 className="text-xl font-semibold">Effectif ({squad.length})</h2>
