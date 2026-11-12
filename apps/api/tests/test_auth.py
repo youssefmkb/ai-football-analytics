@@ -6,7 +6,17 @@ from fastapi.testclient import TestClient
 from app.api.v1.auth import REFRESH_COOKIE
 from app.core.config import get_settings
 from app.core.security import ALGORITHM, utcnow
-from tests.helpers import PASSWORD, register
+from tests.helpers import PASSWORD
+
+
+def register(client: TestClient, email: str) -> dict[str, str]:
+    """Register and keep the refresh cookie on the client, unlike the shared helper."""
+    response = client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "full_name": "Test User", "password": PASSWORD},
+    )
+    assert response.status_code == 201, response.text
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
 def test_register_returns_token_and_sets_httponly_cookie(client: TestClient) -> None:

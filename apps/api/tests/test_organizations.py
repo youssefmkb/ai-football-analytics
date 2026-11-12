@@ -40,9 +40,7 @@ def test_blank_club_name_is_rejected(client: TestClient) -> None:
 
 def test_each_user_only_sees_their_own_club(client: TestClient) -> None:
     alice = register(client, "alice@example.com")
-    client.cookies.clear()
     bob = register(client, "bob@example.com")
-    client.cookies.clear()
     club_a = client.post("/api/v1/organizations", json={"name": "Club A"}, headers=alice).json()
     club_b = client.post("/api/v1/organizations", json={"name": "Club B"}, headers=bob).json()
 

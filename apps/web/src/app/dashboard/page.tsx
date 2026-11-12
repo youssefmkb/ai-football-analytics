@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { useAuth } from "@/components/auth-provider";
 import { Field, FormError, SubmitButton } from "@/components/form";
+import { TeamsSection } from "@/components/teams-section";
 import type { Role } from "@/lib/api";
 import { errorMessage } from "@/lib/messages";
 
@@ -86,13 +87,16 @@ export default function DashboardPage() {
       </header>
 
       {me.membership ? (
-        <section className="rounded-lg border border-zinc-200 p-6 dark:border-zinc-800">
-          <p className="text-sm text-zinc-500">Votre club</p>
-          <p className="text-xl font-semibold">
-            {me.membership.organization_name}
-          </p>
-          <p className="mt-1 text-sm">{ROLE_LABELS[me.membership.role]}</p>
-        </section>
+        <>
+          <section className="rounded-lg border border-zinc-200 p-6 dark:border-zinc-800">
+            <p className="text-sm text-zinc-500">Votre club</p>
+            <p className="text-xl font-semibold">
+              {me.membership.organization_name}
+            </p>
+            <p className="mt-1 text-sm">{ROLE_LABELS[me.membership.role]}</p>
+          </section>
+          <TeamsSection />
+        </>
       ) : (
         <CreateClubForm />
       )}
