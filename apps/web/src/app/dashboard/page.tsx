@@ -5,15 +5,11 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { useAuth } from "@/components/auth-provider";
 import { Field, FormError, SubmitButton } from "@/components/form";
+import { MembersSection } from "@/components/members-section";
 import { TeamsSection } from "@/components/teams-section";
-import type { Role } from "@/lib/api";
 import { errorMessage } from "@/lib/messages";
+import { ROLE_LABELS } from "@/lib/roles";
 
-const ROLE_LABELS: Record<Role, string> = {
-  club_admin: "Administrateur du club",
-  coach: "Entraîneur",
-  player: "Joueur",
-};
 
 function CreateClubForm() {
   const { createClub } = useAuth();
@@ -42,6 +38,10 @@ function CreateClubForm() {
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Le club est votre espace de travail. Vos équipes, vos matchs et vos
         vidéos y seront rattachés.
+      </p>
+      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        Votre club existe déjà ? Demandez un lien d&apos;invitation à son
+        administrateur et ouvrez-le.
       </p>
       <Field label="Nom du club" name="name" maxLength={120} required />
       <FormError message={error} />
@@ -96,6 +96,7 @@ export default function DashboardPage() {
             <p className="mt-1 text-sm">{ROLE_LABELS[me.membership.role]}</p>
           </section>
           <TeamsSection />
+          {me.membership.role === "club_admin" ? <MembersSection /> : null}
         </>
       ) : (
         <CreateClubForm />

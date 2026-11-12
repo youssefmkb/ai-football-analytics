@@ -145,4 +145,5 @@ def test_every_club_scoped_table_has_a_policy(session_factory: sessionmaker[Sess
             )
         )
     assert scoped - exempt == protected
-    assert {"teams", "players", "team_memberships", "matches", "match_lineups"} <= protected
+    expected = {"teams", "players", "team_memberships", "matches", "match_lineups", "invitations"}
+    assert expected <= protected

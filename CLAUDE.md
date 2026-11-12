@@ -43,7 +43,9 @@ Web, from `apps/web`:
 
 - Access tokens are short-lived and stay in memory on the web side. Never put a token in `localStorage`.
 - Refresh tokens are `HttpOnly` cookies, stored hashed, rotated on every use. The web client deduplicates refresh calls because a parallel refresh looks like a replay and ends every session.
-- Writes are limited to club admins and coaches through `require_staff`.
+- Writes are limited to club admins and coaches through `require_staff`. Members and invitations are managed by club admins only, through `require_admin`. A club always keeps at least one admin.
+- Invitation links carry a secret token, stored hashed, valid 7 days, single use. Previewing and accepting a link run on the unscoped session, before the user belongs to the club: the token is the proof, and acceptance locks the row so a link cannot be used twice.
+- `?next=` after sign-in only accepts same-site paths (`safeNextPath`). Keep it that way to avoid open redirects.
 
 ### Data and AI (for the coming milestones)
 
@@ -77,6 +79,8 @@ Milestone 1 (foundation):
 - [x] Accounts, sessions, club creation
 - [x] Teams and players, row-level security
 - [x] Matches (opponent, date, format, score, lineup). Periods arrive with the video, since they are positions in it.
-- [ ] Invitations and the coach and player roles in the interface
+- [x] Invitations and the coach and player roles in the interface
+
+Milestone 1 is complete.
 
 Next milestones: video upload (multipart, resumable), transcoding and player; then timeline, manual annotation, team statistics and match report. Computer vision starts only after a benchmark on real footage shot with a fixed wide-angle camera.
