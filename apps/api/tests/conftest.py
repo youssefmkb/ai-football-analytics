@@ -6,6 +6,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+import app.models  # noqa: F401
+from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 
@@ -18,6 +20,7 @@ def client() -> Iterator[TestClient]:
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+    Base.metadata.create_all(engine)
     testing_session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
     def override_get_db() -> Iterator[Session]:
