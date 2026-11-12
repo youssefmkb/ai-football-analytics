@@ -119,3 +119,30 @@ def test_the_restricted_role_sees_nothing_without_a_club(
         db.execute(text(f"SET LOCAL ROLE {APP_ROLE}"))
         for table in TABLES:
             assert _organizations_visible(db, table) == set()
+
+
+def test_every_club_scoped_table_has_a_policy(session_factory: sessionmaker[Session]) -> None:
+    """Guards future migrations: a new table with organization_id must be protected."""
+    # memberships links users to clubs and is read before the club is known.
+    exempt = {"memberships"}
+    with session_factory() as db:
+        scoped = set(
+            db.scalars(
+                text(
+                    "SELECT table_name FROM information_schema.columns "
+                    "WHERE table_schema = 'public' AND column_name = 'organization_id'"
+                )
+            )
+        )
+        protected = set(
+            db.scalars(
+                text(
+                    "SELECT t.tablename FROM pg_tables t "
+                    "JOIN pg_policies p ON p.tablename = t.tablename "
+                    "WHERE t.schemaname = 'public' AND t.rowsecurity "
+                    "AND p.policyname = 'tenant_isolation'"
+                )
+            )
+        )
+    assert scoped - exempt == protected
+    assert {"teams", "players", "team_memberships", "matches", "match_lineups"} <= protected

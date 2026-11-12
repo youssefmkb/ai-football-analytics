@@ -35,6 +35,9 @@ Web, from `apps/web`:
 - The club always comes from the token (`get_current_membership`), never from a path, query or body parameter.
 - A resource of another club answers 404, exactly like a missing one.
 - Any new club-scoped endpoint gets a test where a second club tries to read and write it.
+- `test_every_club_scoped_table_has_a_policy` fails when a table with `organization_id` has no policy. Do not add a table to its exemption list without a reason written next to it.
+- Ids received in a request body (a `team_id`, a `player_id`) are client input: look them up inside the caller's club before using them.
+- History is kept: a team with matches and a player in a lineup cannot be deleted (409).
 
 ### Authentication
 
@@ -73,7 +76,7 @@ Milestone 1 (foundation):
 - [x] Repository, Docker Compose, CI
 - [x] Accounts, sessions, club creation
 - [x] Teams and players, row-level security
-- [ ] Matches (opponent, date, format, lineup, periods)
+- [x] Matches (opponent, date, format, score, lineup). Periods arrive with the video, since they are positions in it.
 - [ ] Invitations and the coach and player roles in the interface
 
 Next milestones: video upload (multipart, resumable), transcoding and player; then timeline, manual annotation, team statistics and match report. Computer vision starts only after a benchmark on real footage shot with a fixed wide-angle camera.

@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_current_membership, get_tenant_db, require_staff
-from app.models import Membership, Player, Team, TeamMembership
+from app.models import Match, MatchLineup, Membership, Player, Team, TeamMembership
 from app.schemas.team import (
     SquadPlayerCreate,
     SquadPlayerOut,
@@ -138,6 +138,9 @@ def delete_team(
     db: Session = Depends(get_tenant_db),
 ) -> None:
     team = _get_team(db, membership.organization_id, team_id)
+    has_matches = db.scalar(select(Match.id).where(Match.team_id == team.id).limit(1))
+    if has_matches is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Team has matches")
     player_ids = [entry.player_id for entry in team.memberships]
     db.delete(team)
     db.flush()
@@ -251,6 +254,17 @@ def remove_player(
     db: Session = Depends(get_tenant_db),
 ) -> None:
     entry = _get_squad_entry(db, membership.organization_id, team_id, player_id)
+    in_a_lineup = db.scalar(
+        select(MatchLineup.id)
+        .join(MatchLineup.match)
+        .where(MatchLineup.player_id == player_id, Match.team_id == team_id)
+        .limit(1)
+    )
+    if in_a_lineup is not None:
+        # Removing them would rewrite the history of matches already played.
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Player appears in a match lineup"
+        )
     db.delete(entry)
     db.flush()
     _delete_players_without_team(db, membership.organization_id, [player_id])
