@@ -25,7 +25,9 @@ Then open:
 - API documentation: http://localhost:8000/docs
 - API health check: http://localhost:8000/api/v1/health
 
-The home page shows whether the API and the database are reachable. Both rows should turn green.
+The home page shows whether the API and the database are reachable. Both rows should turn green. From there you can create an account, sign in and create your club.
+
+Run `docker compose up --build` again after pulling changes that touch `pyproject.toml` or `package.json`, so the images pick up the new dependencies. Database migrations are applied when the API container starts.
 
 To stop the stack, press `Ctrl+C`, then run `docker compose down`. Add `-v` to also delete the database volume.
 
@@ -60,6 +62,13 @@ npm run dev
 ```
 
 Checks run by the CI: `npm run lint`, `npx tsc --noEmit`, `npm run build`.
+
+## Authentication
+
+- The access token is short-lived (15 minutes) and kept in memory by the web application.
+- The refresh token is an `HttpOnly` cookie, stored hashed in the database, rotated on every use and revoked on logout. Replaying an old refresh token ends all sessions of that user.
+- The club of a request is always resolved from the token, never from a parameter sent by the client.
+- Outside development, the API refuses to start without `SECRET_KEY` and `COOKIE_SECURE=true`.
 
 ## Workflow
 
